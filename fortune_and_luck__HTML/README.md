@@ -14,7 +14,7 @@ A playable HTML5 prototype of the Imperial Fortune slot game built for the AGS G
 
 - **Slot reels (left)**: 3 reels, 22 stops each, displayed as a 3×3 grid with the middle row paying.
 - **Fortune Wheel (right)**: Always-visible roulette-style wheel that spins in parallel with every slot spin.
-- **Stats bar (bottom-right)**: Live tracking of spin count, total bet, total won, and realized RTP. After 100+ spins, this should converge near the theoretical 90.24%.
+- **Stats bar (bottom-right)**: Live tracking of spin count, total bet, total won, and realized RTP. After 100+ spins this should converge near the theoretical 90.24%.
 
 ## What to Watch For
 
