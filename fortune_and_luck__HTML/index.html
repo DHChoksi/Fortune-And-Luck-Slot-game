@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperial Fortune — Slot Game Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --crimson: #8B0000;
+            --crimson-deep: #5C0000;
+            --gold: #D4A93A;
+            --gold-bright: #FFE066;
+            --gold-deep: #8B6914;
+            --jade: #3F7048;
+            --black-lacquer: #1A0A0A;
+            --bg-purple: #2A1659;
+            --reel-bg: #1F0A0A;
+            --frame-gradient: linear-gradient(180deg, #FFE066 0%, #D4A93A 35%, #8B6914 100%);
+            --button-gradient: linear-gradient(180deg, #FFE066 0%, #D4A93A 50%, #8B6914 100%);
+            --crimson-gradient: linear-gradient(180deg, #B22222 0%, #8B0000 100%);
+            --symbol-size: 130px;
+            --reel-width: 160px;
+            --visible-rows: 3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: url('assets/Background.png') center/cover no-repeat fixed, linear-gradient(135deg, #2A1659 0%, #1A0A40 100%);
+            min-height: 100vh;
+            color: #FFE066;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ─── Header ───────────────────────────────────────────── */
+        .game-header {
+            text-align: center;
+            padding: 10px 0 6px;
+        }
+
+            .game-header h1 {
+                font-family: 'Cinzel', serif;
+                font-weight: 900;
+                font-size: 48px;
+                letter-spacing: 6px;
+                background: linear-gradient(180deg, #FFE066 0%, #D4A93A 50%, #8B6914 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+                margin-bottom: 2px;
+            }
+
+            .game-header .subtitle {
+                color: rgba(255, 224, 102, 0.7);
+                font-size: 14px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+            }
+
+        /* ─── Main game area ───────────────────────────────────── */
+        .game-area {
+            display: grid;
+            /* CHANGE THIS: 'auto auto' prevents the large gap */
+            grid-template-columns: auto auto;
+            gap: 40px; /* Adjust this value to set the exact distance between them */
+            align-items: center;
+            justify-content: center; /* Keeps the pair centered in the screen */
+            flex: 1;
+        }
+
+        /* Replace .game-header h1 with this */
+        .game-title-img {
+            max-width: 600px; /* Adjust this to make the title bigger or smaller */
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+            margin-bottom: -10px; /* Pulls the subtitle a little closer */
+        }
+
+        /* Keep your subtitle style as is, but ensure it's positioned well */
+        .game-header .subtitle {
+            color: rgba(255, 224, 102, 0.7);
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        /* ─── Slot machine ─────────────────────────────────────── */
+        .slot-machine {
+            position: relative;
+            padding: 20px;
+            width: max-content; /* Add this to shrink the frame to the reels */
+            background: linear-gradient(180deg, #4A0808 0%, #2A0404 100%);
+            border-radius: 20px;
+            border: 6px solid transparent;
+            background-clip: padding-box;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.6), 0 0 0 2px var(--gold-deep), 0 0 0 8px var(--gold), 0 0 0 10px var(--gold-deep);
+        }
+
+        .slot-frame {
+            position: relative;
+            display: flex;
+            gap: 8px;
+            background: #0A0303;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+        }
+
+        .reel-container {
+            width: var(--reel-width);
+            height: calc(var(--symbol-size) * var(--visible-rows));
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(180deg, #2A0404 0%, #1A0202 50%, #2A0404 100%);
+            border: 2px solid var(--gold-deep);
+            border-radius: 4px;
+        }
+
+        .reel-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            will-change: transform;
+        }
+
+        .reel-symbol {
+            width: var(--reel-width);
+            height: var(--symbol-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+            .reel-symbol img {
+                max-width: 90%;
+                max-height: 90%;
+                object-fit: contain;
+                filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+            }
+
+        .reel-container::before,
+        .reel-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 30px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .reel-container::before {
+            top: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent);
+        }
+
+        .reel-container::after {
+            bottom: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent);
+        }
+
+        .payline-indicator {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            top: calc(12px + var(--symbol-size));
+            height: var(--symbol-size);
+            pointer-events: none;
+            border-top: 2px solid rgba(212, 169, 58, 0.4);
+            border-bottom: 2px solid rgba(212, 169, 58, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Pushes content to the right */
+        }
+
+          /* The "PAYLINE" text label */
+          .payline-indicator::after {
+            content: 'PAYLINE';
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(212, 169, 58, 0.6);
+            margin-right: -45px; /* Pulls it slightly outside the frame to the right */
+            transform: rotate(90deg); /* Makes it vertical so it fits the slot machine vibe */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+         } 
+
+         /* Make the text glow white/gold when the user wins */
+         .payline-indicator.win::after {
+             color: var(--gold-bright);
+            text-shadow: 0 0 10px var(--gold-bright);
+         }
+
+        .payline-indicator.win {
+            border-top: 3px solid var(--gold-bright);
+            border-bottom: 3px solid var(--gold-bright);
+            background: linear-gradient(180deg, rgba(255, 224, 102, 0.15) 0%, rgba(255, 224, 102, 0.25) 50%, rgba(255, 224, 102, 0.15) 100%);
+            box-shadow: inset 0 0 30px rgba(255, 224, 102, 0.4), 0 0 20px rgba(255, 224, 102, 0.6);
+            animation: paylineWin 1.2s ease-in-out infinite;
+        }
+
+        @keyframes paylineWin {
+            0%, 100% {
+                box-shadow: inset 0 0 30px rgba(255, 224, 102, 0.4), 0 0 20px rgba(255, 224, 102, 0.6);
+            }
+
+            50% {
+                box-shadow: inset 0 0 50px rgba(255, 224, 102, 0.7), 0 0 40px rgba(255, 224, 102, 0.9);
+            }
+        }
+
+        /* ─── Fortune Wheel ────────────────────────────────────── */
+        .wheel-container {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        .wheel-arrow {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 30px solid var(--gold-bright);
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+            .wheel-arrow::after {
+                content: '';
+                position: absolute;
+                top: -34px;
+                left: -22px;
+                width: 0;
+                height: 0;
+                border-left: 22px solid transparent;
+                border-right: 22px solid transparent;
+                border-top: 34px solid var(--gold-deep);
+                z-index: -1;
+            }
+
+        .wheel {
+            width: 360px;
+            height: 360px;
+            object-fit: contain;
+            transform: rotate(0deg);
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.7));
+            will-change: transform;
+            transform-origin: center center;
+        }
+
+        .wheel-label {
+            position: absolute;
+            bottom: -36px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            letter-spacing: 4px;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        /* ─── Control bar ──────────────────────────────────────── */
+        .control-bar {
+            background: linear-gradient(180deg, #2A0404 0%, #1A0202 100%);
+            border: 3px solid var(--gold-deep);
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+
+        .stats-display {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 224, 102, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stat-value {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--gold-bright);
+            text-shadow: 0 0 8px rgba(255, 224, 102, 0.5);
+        }
+
+            .stat-value.win-value.flashing {
+                animation: winFlash 0.5s ease-in-out 4;
+            }
+
+        @keyframes winFlash {
+            0%, 100% {
+                color: var(--gold-bright);
+                text-shadow: 0 0 8px rgba(255, 224, 102, 0.5);
+            }
+
+            50% {
+                color: #fff;
+                text-shadow: 0 0 24px #fff, 0 0 40px var(--gold-bright);
+            }
+        }
+
+        .bet-select {
+            background: var(--button-gradient);
+            color: var(--black-lacquer);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 6px 12px;
+            border: 2px solid var(--gold-deep);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: transform 0.1s ease, filter 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+            .btn:hover {
+                filter: brightness(1.15);
+            }
+
+            .btn:active {
+                transform: scale(0.95);
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                filter: grayscale(0.6);
+            }
+
+        .btn-primary {
+            background: var(--crimson-gradient);
+            color: var(--gold-bright);
+            font-size: 26px;
+            padding: 18px 56px;
+            border: 3px solid var(--gold);
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -4px 8px rgba(0,0,0,0.4), 0 6px 16px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+        }
+
+            .btn-primary:not(:disabled):hover {
+                box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -4px 8px rgba(0,0,0,0.4), 0 6px 24px rgba(255, 224, 102, 0.5);
+            }
+
+        .btn-secondary {
+            background: var(--button-gradient);
+            color: var(--black-lacquer);
+            font-size: 14px;
+            padding: 12px 18px;
+            border: 2px solid var(--gold-deep);
+        }
+
+        .game-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: right;
+            font-size: 12px;
+            color: rgba(255, 224, 102, 0.7);
+        }
+
+        .stat-mini {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+            .stat-mini span {
+                color: var(--gold-bright);
+                font-weight: 700;
+            }
+
+        .status-bar {
+            text-align: center;
+            padding: 8px;
+            color: var(--gold-bright);
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            letter-spacing: 2px;
+            min-height: 40px;
+            transition: all 0.3s ease;
+        }
+
+            .status-bar.flashing {
+                animation: statusFlash 0.5s ease-in-out 3;
+            }
+
+        @keyframes statusFlash {
+            0%, 100% {
+                color: var(--gold-bright);
+                transform: scale(1);
+            }
+
+            50% {
+                color: #fff;
+                transform: scale(1.05);
+                text-shadow: 0 0 20px var(--gold-bright);
+            }
+        }
+
+        /* ─── Popups ───────────────────────────────────────────── */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+            .popup-overlay.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+        .popup-content {
+            background: linear-gradient(180deg, #4A0808 0%, #2A0404 100%);
+            border: 4px solid var(--gold);
+            border-radius: 16px;
+            padding: 36px 48px;
+            text-align: center;
+            color: var(--gold-bright);
+            box-shadow: 0 0 60px rgba(255, 224, 102, 0.6), inset 0 0 40px rgba(0,0,0,0.6);
+            max-width: 600px;
+            animation: popupBounce 0.5s ease-out;
+        }
+
+        @keyframes popupBounce {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .popup-content h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            margin-bottom: 16px;
+            letter-spacing: 4px;
+            background: linear-gradient(180deg, #FFE066 0%, #D4A93A 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .popup-amount {
+            font-family: 'Cinzel', serif;
+            font-size: 56px;
+            font-weight: 900;
+            color: var(--gold-bright);
+            text-shadow: 0 0 12px var(--gold-bright), 0 0 24px rgba(255, 224, 102, 0.5);
+            margin: 16px 0;
+        }
+
+        #popup-detail {
+            font-size: 16px;
+            color: rgba(255, 224, 102, 0.85);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .paytable-content {
+            text-align: left;
+            padding: 30px 40px;
+        }
+
+            .paytable-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+
+            .paytable-content td {
+                padding: 10px 14px;
+                border-bottom: 1px solid rgba(212, 169, 58, 0.3);
+                color: var(--gold-bright);
+                font-size: 16px;
+            }
+
+                .paytable-content td:nth-child(3) {
+                    text-align: right;
+                    font-weight: 700;
+                    font-family: 'Cinzel', serif;
+                }
+
+        .pay-icon {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .paytable-content h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .paytable-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+            .paytable-content ul li {
+                padding: 8px 0;
+                color: rgba(255, 224, 102, 0.9);
+                font-size: 14px;
+            }
+
+                .paytable-content ul li::before {
+                    content: '◆ ';
+                    color: var(--gold);
+                }
+
+        .rtp-note {
+            margin: 20px 0;
+            text-align: center;
+            color: var(--gold);
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .paytable-content .btn {
+            display: block;
+            margin: 16px auto 0;
+        }
+
+        .coin-shower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .coin-particle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: url('assets/Gold_Coin.png') center/contain no-repeat;
+            animation: coinFall linear forwards;
+        }
+
+        @keyframes coinFall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .btn.auto-active {
+            background: var(--crimson-gradient);
+            color: var(--gold-bright);
+        }
+
+        .match-indicator {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(212, 169, 58, 0.2);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--gold-bright);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+            .match-indicator.show {
+                opacity: 1;
+            }
+
+            .match-indicator.special {
+                background: var(--crimson-gradient);
+                border-color: var(--gold-bright);
+                box-shadow: 0 0 16px rgba(255, 224, 102, 0.6);
+            }
+
+        /* ─── DEBUG PANEL ──────────────────────────────────────── */
+        #debug-panel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.92);
+            border: 1px solid rgba(212, 169, 58, 0.5);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #88FF88;
+            z-index: 200;
+            min-width: 340px;
+            max-height: 320px;
+            overflow-y: auto;
+            display: none;
+            line-height: 1.6;
+        }
+
+            #debug-panel.visible {
+                display: block;
+            }
+
+            #debug-panel h4 {
+                color: var(--gold);
+                font-size: 12px;
+                margin-bottom: 6px;
+                letter-spacing: 1px;
+                font-family: 'Cinzel', serif;
+            }
+
+            #debug-panel .debug-row {
+                margin: 2px 0;
+            }
+
+            #debug-panel .debug-key {
+                color: #FFAA44;
+            }
+
+            #debug-panel .debug-val {
+                color: #88FF88;
+            }
+
+            #debug-panel .debug-warn {
+                color: #FF6666;
+            }
+
+            #debug-panel .debug-sep {
+                color: rgba(212,169,58,0.4);
+                margin: 4px 0;
+            }
+
+        #debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(212, 169, 58, 0.4);
+            color: var(--gold);
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 201;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        #debug-panel.visible + #debug-toggle {
+            bottom: 340px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .game-area {
+                display: grid;
+                grid-template-columns: auto auto; /* Changed from 1fr auto */
+                gap: 30px;
+                align-items: center;
+                justify-content: center; /* This keeps everything centered */
+                flex: 1;
+            }
+
+            .game-header h1 {
+                font-size: 36px;
+                letter-spacing: 4px;
+            }
+
+            :root {
+                --symbol-size: 100px;
+                --reel-width: 130px;
+            }
+
+            .wheel-container {
+                width: 320px;
+                height: 320px;
+            }
+
+            .wheel {
+                width: 300px;
+                height: 300px;
+            }
+
+            .control-bar {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .stats-display {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .game-stats {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Audio Elements -->
+    <audio id="snd-bg" src="assets/audio/bg_music.mp3" loop></audio>
+    <audio id="snd-spin" src="assets/audio/reel_spin.mp3" loop></audio>
+    <audio id="snd-win" src="assets/audio/win.mp3"></audio>
+    <audio id="snd-click" src="assets/audio/click.mp3"></audio>
+    <audio id="snd-jackpot" src="assets/audio/jackpot.mp3"></audio>
+
+    <div class="game-container">
+        <header class="game-header">
+            <img src="assets/Title.png" alt="Imperial Fortune" class="game-title-img">
+            <p class="subtitle">When the slot and the wheel agree, magic happens</p>
+        </header>
+
+        <main class="game-area">
+            <div class="slot-machine">
+                <div class="slot-frame">
+                    <div class="reel-container" id="reel-0"><div class="reel-strip"></div></div>
+                    <div class="reel-container" id="reel-1"><div class="reel-strip"></div></div>
+                    <div class="reel-container" id="reel-2"><div class="reel-strip"></div></div>
+                    <div class="payline-indicator" id="payline"></div>
+                </div>
+            </div>
+
+            <div class="wheel-container">
+                <div class="wheel-label">Fortune Wheel</div>
+
+                <div class="wheel-arrow"></div>
+                <img class="wheel" id="wheel" src="assets/Fortune_Wheel.png" alt="Fortune Wheel">
+                <div class="match-indicator" id="match-indicator"></div>
+            </div>
+        </main>
+
+        <div class="status-bar" id="status-bar">Press SPIN to begin</div>
+
+        <footer class="control-bar">
+            <div class="stats-display">
+                <div class="stat">
+                    <span class="stat-label">Balance</span>
+                    <span class="stat-value" id="balance">$100.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Last Win</span>
+                    <span class="stat-value win-value" id="last-win">$0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Bet</span>
+                    <select class="bet-select" id="bet-select">
+                        <option value="1" selected>$1</option>
+                        <option value="3">$3</option>
+                        <option value="5">$5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="paytable-btn">PAYS</button>
+                <button class="btn btn-primary" id="spin-btn">SPIN</button>
+                <button class="btn btn-secondary" id="auto-btn">AUTO 25</button>
+            </div>
+
+            <div class="game-stats">
+                <div class="stat-mini">Spins: <span id="spin-count">0</span></div>
+                <div class="stat-mini">Total Bet: <span id="total-bet">$0</span></div>
+                <div class="stat-mini">Total Won: <span id="total-won">$0</span></div>
+                <div class="stat-mini">Realized RTP: <span id="realized-rtp">—</span></div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Win popup -->
+    <div class="popup-overlay hidden" id="win-popup">
+        <div class="popup-content">
+            <h2 id="popup-title">WIN!</h2>
+            <div class="popup-amount" id="popup-amount">$0.00</div>
+            <div id="popup-detail"></div>
+            <button class="btn btn-secondary" id="close-popup">CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- Paytable popup -->
+    <div class="popup-overlay hidden" id="paytable-popup">
+        <div class="popup-content paytable-content">
+            <h2>PAYTABLE</h2>
+            <table>
+                <tr><td><img src="assets/Lantern.png" class="pay-icon" alt=""></td><td>3× Lantern</td><td>8× bet</td></tr>
+                <tr><td><img src="assets/Gold_Coin.png" class="pay-icon" alt=""></td><td>3× Gold Coin</td><td>8× bet</td></tr>
+                <tr><td><img src="assets/Jade.png" class="pay-icon" alt=""></td><td>3× Jade Pendant</td><td>12× bet</td></tr>
+                <tr><td><img src="assets/Dragon.png" class="pay-icon" alt=""></td><td>3× Dragon</td><td>100× bet</td></tr>
+                <tr><td><img src="assets/Treasure_Chest.png" class="pay-icon" alt=""></td><td>3× Treasure Box</td><td>350× bet</td></tr>
+            </table>
+            <h3>Fortune Wheel Bonuses</h3>
+            <ul>
+                <li><strong>1 special on payline matches the wheel</strong> → Guaranteed free spin (free spins do not chain)</li>
+                <li><strong>2 specials on payline match the wheel</strong> → 2× cash bonus</li>
+                <li><strong>3 specials on payline ALL match the wheel</strong> → 3× line multiplier (jackpot!)</li>
+            </ul>
+            <p class="rtp-note">
+                Theoretical RTP: ~90.0% &nbsp;•&nbsp; Wheel matches Dragon or Treasure Box only — Numbers are decorative<br>
+                Press <strong>D</strong> to toggle debug panel (shows wheel math)
+            </p>
+            <button class="btn btn-secondary" id="close-paytable">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel">
+        <h4>🎡 WHEEL DEBUG</h4>
+        <div id="debug-content">Spin to see debug info...</div>
+    </div>
+    <button id="debug-toggle" title="Toggle debug panel (D)">DEBUG</button>
+
+    <script>
+        
+        // ─── AUDIO SYSTEM ────────────────────────────────────────────────────────
+        const audio = {
+            bg: document.getElementById('snd-bg'),
+            spin: document.getElementById('snd-spin'),
+            win: document.getElementById('snd-win'),
+            click: document.getElementById('snd-click'),
+            jackpot: document.getElementById('snd-jackpot')
+        };
+
+        // Background music volume = 50%
+        audio.bg.volume = 0.5;
+
+        // Other volumes
+        audio.spin.volume = 0.45;
+        audio.win.volume = 0.8;
+        audio.click.volume = 0.7;
+        audio.jackpot.volume = 1.0;
+
+        function playSound(sound, restart = true) {
+            if (!sound) return;
+
+            try {
+                if (restart) {
+                    sound.pause();
+                    sound.currentTime = 0;
+                }
+
+                const playPromise = sound.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => { });
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function stopSound(sound) {
+            if (!sound) return;
+
+            sound.pause();
+            sound.currentTime = 0;
+        }
+
+        // Unlock browser audio + start BGM on first interaction
+        function initAudio() {
+            playSound(audio.bg, false);
+
+            document.removeEventListener('click', initAudio);
+            document.removeEventListener('keydown', initAudio);
+        }
+
+        document.addEventListener('click', initAudio);
+        document.addEventListener('keydown', initAudio);
+
+        // Global button click sounds
+        document.addEventListener('click', (e) => {
+            if (
+                e.target.tagName === 'BUTTON' ||
+                e.target.tagName === 'SELECT' ||
+                e.target.classList.contains('btn')
+            ) {
+                playSound(audio.click);
+            }
+        });
+
+        // ─── DATA ──────────────────────────────────────────────────────────────
+        const SYMBOLS = {
+            LANTERN: { id: 'lantern', name: 'Lantern', image: 'assets/Lantern.png', isSpecial: false },
+            GOLD: { id: 'gold', name: 'Gold Coin', image: 'assets/Gold_Coin.png', isSpecial: false },
+            JADE: { id: 'jade', name: 'Jade Pendant', image: 'assets/Jade.png', isSpecial: false },
+            DRAGON: { id: 'dragon', name: 'Dragon', image: 'assets/Dragon.png', isSpecial: true },
+            TREASURE: { id: 'treasure', name: 'Treasure Box', image: 'assets/Treasure_Chest.png', isSpecial: true }
+        };
+
+        // 22-stop reel strip
+        const REEL_STRIP = [
+            SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.JADE,
+            SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.DRAGON,
+            SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.JADE, SYMBOLS.LANTERN, SYMBOLS.GOLD,
+            SYMBOLS.LANTERN, SYMBOLS.GOLD, SYMBOLS.TREASURE, SYMBOLS.LANTERN, SYMBOLS.GOLD,
+            SYMBOLS.JADE, SYMBOLS.JADE
+        ];
+        console.assert(REEL_STRIP.length === 22, 'Reel strip must have exactly 22 stops');
+
+        const PAYTABLE = {
+            lantern: 8,
+            gold: 8,
+            jade: 12,
+            dragon: 100,
+            treasure: 350
+        };
+
+        // ─── WHEEL SEGMENTS ────────────────────────────────────────────────────
+        // 32 logical segments. Indices 0, 8, 16, 24 are SPECIAL (2× angular width).
+        // All other 28 segments are normal numbers (1× angular width).
+        // Total visual slots = 4×2 + 28×1 = 36  →  each slot = 10°
+        //
+        //  Segment 0  (Treasure, 2 slots) : 0°–20°,   center 10°
+        //  Segment 1  (number,   1 slot)  : 20°–30°,  center 25°
+        //  ...
+        //  Segment 8  (Dragon,   2 slots) : 90°–110°, center 100°
+        //  ...
+        //  Segment 16 (Treasure, 2 slots) : 180°–200°,center 190°
+        //  ...
+        //  Segment 24 (Dragon,   2 slots) : 270°–290°,center 280°
+        //  ...
+        //  Segment 31 (number)            : 350°–360°, center 355°
+        //
+        const WHEEL_SEGMENTS = [
+            { type: 'treasure', display: 'TREASURE' }, // 0  ← SPECIAL (2 slots)
+            { type: 'number', display: '1' },
+            { type: 'number', display: '2' },
+            { type: 'number', display: '13' },
+            { type: 'number', display: '7' },
+            { type: 'number', display: '15' },
+            { type: 'number', display: '32' },
+            { type: 'number', display: '1' },
+            { type: 'dragon', display: 'DRAGON' },     // 8  ← SPECIAL (2 slots)
+            { type: 'number', display: '31' },
+            { type: 'number', display: '28' },
+            { type: 'number', display: '13' },
+            { type: 'number', display: '2' },
+            { type: 'number', display: '3' },
+            { type: 'number', display: '26' },
+            { type: 'number', display: '3' },
+            { type: 'treasure', display: 'TREASURE' }, // 16 ← SPECIAL (2 slots)
+            { type: 'number', display: '30' },
+            { type: 'number', display: '11' },
+            { type: 'number', display: '28' },
+            { type: 'number', display: '8' },
+            { type: 'number', display: '15' },
+            { type: 'number', display: '26' },
+            { type: 'number', display: '9' },
+            { type: 'dragon', display: 'DRAGON' },     // 24 ← SPECIAL (2 slots)
+            { type: 'number', display: '15' },
+            { type: 'number', display: '16' },
+            { type: 'number', display: '37' },
+            { type: 'number', display: '35' },
+            { type: 'number', display: '19' },
+            { type: 'number', display: '3' },
+            { type: 'number', display: '36' }
+        ];
+        console.assert(WHEEL_SEGMENTS.length === 32, 'WHEEL_SEGMENTS must have 32 entries');
+
+        // ─── WHEEL GEOMETRY (computed once at startup) ─────────────────────────
+        //
+        // CORRECT SPECIAL INDICES — segments 0, 8, 16, 24 are 2× wide.
+        //
+        const WHEEL_SPECIAL_INDICES = new Set([0, 8, 16, 24]);
+        const WHEEL_TOTAL_SLOTS = 36;       // 36 visual slots in the full circle
+        const WHEEL_DEG_PER_SLOT = 360 / WHEEL_TOTAL_SLOTS; // 10° per slot
+
+        // Pre-compute the center angle (CW from top, at wheel rotation=0) for
+        // every segment so we can log and verify them easily.
+        const SEGMENT_CENTER_ANGLES = (() => {
+            const angles = [];
+            let slotCursor = 0;
+            for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
+                const isSpecial = WHEEL_SPECIAL_INDICES.has(i);
+                const slotWidth = isSpecial ? 2 : 1;
+                const center = (slotCursor + slotWidth / 2) * WHEEL_DEG_PER_SLOT;
+                angles.push({ idx: i, slotsBefore: slotCursor, slotWidth, center });
+                slotCursor += slotWidth;
+            }
+            // Verify total slots adds up
+            console.assert(slotCursor === WHEEL_TOTAL_SLOTS,
+                `Total slots ${slotCursor} ≠ ${WHEEL_TOTAL_SLOTS} — check WHEEL_SPECIAL_INDICES`);
+            return angles;
+        })();
+
+        // Log the full segment map at startup
+        console.group('🗺️  Wheel Segment Map (all 32 segments)');
+        console.log('idx | display    | type     | slotsBefore | slotWidth | centerAngle');
+        console.log('────┼────────────┼──────────┼─────────────┼───────────┼────────────');
+        SEGMENT_CENTER_ANGLES.forEach(({ idx, slotsBefore, slotWidth, center }) => {
+            const seg = WHEEL_SEGMENTS[idx];
+            const special = slotWidth === 2 ? ' ★ SPECIAL' : '';
+            console.log(
+                ` ${String(idx).padStart(2)} | ${seg.display.padEnd(10)} | ${seg.type.padEnd(8)} | ` +
+                `${String(slotsBefore).padStart(11)} | ${String(slotWidth).padStart(9)} | ${center.toFixed(1)}°${special}`
+            );
+        });
+        console.groupEnd();
+
+        const WHEEL_RULES = {
+            oneMatchFreeSpin: true,
+            twoMatchCashMultiplier: 2,
+            threeMatchLineMultiplier: 3
+        };
+
+        const CONFIG = {
+            startingBalance: 100.00,
+            reelSpinDurationBase: 1.4,
+            reelStopStaggerSeconds: 0.4,
+            wheelSpinDuration: 2.5,
+            wheelExtraRotations: 4,
+            symbolHeight: 130,
+            reelStripRepeats: 5,
+            freeSpinDelayMs: 1200,
+            autoSpinDelayMs: 600,
+            autoSpinCount: 25,
+            // CALIBRATION FIX: The wheel image has Treasure Box CENTER at 0° (top arrow),
+            // not its left edge. Our geometry model assumed the left edge of segment 0
+            // sits at 0°, placing every center 10° ahead of reality. This made the wheel
+            // consistently land on the NEXT segment (one 10° slot too far).
+            // Setting -10 corrects this: each center is shifted back by one slot.
+            wheelCalibrationDeg: -10
+        };
+
+        // ─── GAME STATE ────────────────────────────────────────────────────────
+        const state = {
+            balance: CONFIG.startingBalance,
+            betSize: 1,
+            isSpinning: false,
+            autoSpinsRemaining: 0,
+            spinCount: 0,
+            totalBet: 0,
+            totalWon: 0,
+            hitCount: 0,
+            matchCounts: { 1: 0, 2: 0, 3: 0 },
+            lineWinHistory: []
+        };
+
+        // ─── PURE LOGIC: PayoutCalculator ─────────────────────────────────────
+        function runSpin(betSize, isCurrentlyFreeSpin = false) {
+            const stops = [
+                Math.floor(Math.random() * 22),
+                Math.floor(Math.random() * 22),
+                Math.floor(Math.random() * 22)
+            ];
+
+            const paylineSymbols = stops.map(s => REEL_STRIP[s]);
+
+            let hasLineWin = false;
+            let lineWinSymbol = null;
+            let lineWinAmount = 0;
+            if (paylineSymbols[0].id === paylineSymbols[1].id &&
+                paylineSymbols[1].id === paylineSymbols[2].id) {
+                hasLineWin = true;
+                lineWinSymbol = paylineSymbols[0].id;
+                lineWinAmount = (PAYTABLE[lineWinSymbol] || 0) * betSize;
+            }
+
+            const wheelIdx = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+            const wheelSegment = WHEEL_SEGMENTS[wheelIdx];
+
+            let matchCount = 0;
+            if (wheelSegment.type === 'dragon') {
+                matchCount = paylineSymbols.filter(s => s.id === 'dragon').length;
+            } else if (wheelSegment.type === 'treasure') {
+                matchCount = paylineSymbols.filter(s => s.id === 'treasure').length;
+            }
+
+            let isFreeSpin = false;
+            let cashBonus = 0;
+            let lineMultiplier = 1;
+
+            if (matchCount === 1 && WHEEL_RULES.oneMatchFreeSpin && !isCurrentlyFreeSpin) {
+                isFreeSpin = true; // Guaranteed free spin; does not chain (no free spin during a free spin)
+            } else if (matchCount === 2) {
+                cashBonus = WHEEL_RULES.twoMatchCashMultiplier * betSize;
+            } else if (matchCount === 3) {
+                lineMultiplier = WHEEL_RULES.threeMatchLineMultiplier;
+            }
+
+            const totalWin = (lineWinAmount * lineMultiplier) + cashBonus;
+
+            return {
+                stops, paylineSymbols,
+                hasLineWin, lineWinSymbol, lineWinAmount,
+                wheelIdx, wheelSegment,
+                matchCount, isFreeSpin, cashBonus, lineMultiplier,
+                totalWin
+            };
+        }
+
+        // ─── DOM REFERENCES ───────────────────────────────────────────────────
+        const $ = id => document.getElementById(id);
+        const reelContainers = [$('reel-0'), $('reel-1'), $('reel-2')];
+        const reelStrips = reelContainers.map(c => c.querySelector('.reel-strip'));
+        const wheelEl = $('wheel');
+        const balanceEl = $('balance');
+        const lastWinEl = $('last-win');
+        const spinBtn = $('spin-btn');
+        const autoBtn = $('auto-btn');
+        const betSelect = $('bet-select');
+        const statusBar = $('status-bar');
+        const paylineEl = $('payline');
+        const matchIndicator = $('match-indicator');
+        const debugPanel = $('debug-panel');
+        const debugContent = $('debug-content');
+
+        // ─── REEL VISUALIZATION ────────────────────────────────────────────────
+        function buildReelStrips() {
+            reelStrips.forEach(strip => {
+                strip.innerHTML = '';
+                for (let r = 0; r < CONFIG.reelStripRepeats; r++) {
+                    REEL_STRIP.forEach(symbol => {
+                        const div = document.createElement('div');
+                        div.className = 'reel-symbol';
+                        const img = document.createElement('img');
+                        img.src = symbol.image;
+                        img.alt = symbol.name;
+                        div.appendChild(img);
+                        strip.appendChild(div);
+                    });
+                }
+            });
+            reelStrips.forEach(strip => {
+                strip.style.transition = 'none';
+                strip.style.transform = 'translateY(0)';
+            });
+        }
+
+        function spinReelTo(reelIdx, targetStop, durationSec) {
+            return new Promise(resolve => {
+                const strip = reelStrips[reelIdx];
+                strip.style.transition = 'none';
+                strip.style.transform = 'translateY(0)';
+                void strip.offsetHeight;
+
+                const repeatIdx = 3;
+                const K = repeatIdx * 22 + targetStop;
+                const targetY = -(K - 1) * CONFIG.symbolHeight;
+
+                strip.style.transition = `transform ${durationSec}s cubic-bezier(0.17, 0.67, 0.22, 0.99)`;
+                strip.style.transform = `translateY(${targetY}px)`;
+                setTimeout(resolve, durationSec * 1000);
+            });
+        }
+
+        // ─── WHEEL VISUALIZATION ───────────────────────────────────────────────
+        let currentWheelRotation = 0;
+
+        /**
+         * spinWheelTo — FIXED VERSION
+         *
+         * THE FIX IN ONE PARAGRAPH:
+         * The wheel's 32 segments are NOT equal width. The 4 special symbols
+         * (Dragon × 2, Treasure Box × 2) at WHEEL_SEGMENTS indices 0, 8, 16, 24
+         * occupy TWICE the angular space of a normal number segment. This gives 36
+         * total "virtual slots" of 10° each. To land on the correct segment we must
+         * compute how many virtual slots precede it, then find the center angle of
+         * the target segment in that 36-slot space, and rotate the wheel so that
+         * center aligns with the fixed arrow at the top.
+         *
+         * OLD (broken): specialIndices = [5, 12, 20, 28]  ← arbitrary placeholders
+         * NEW (correct): uses WHEEL_SPECIAL_INDICES = Set([0, 8, 16, 24])
+         *                and pre-computed SEGMENT_CENTER_ANGLES lookup
+         */
+        function spinWheelTo(targetSegmentIdx, durationSec, extraRotations) {
+            return new Promise(resolve => {
+
+                // ── Look up pre-computed center angle ──────────────────────────────
+                const { slotsBefore, slotWidth, center: segmentCenterAngle } =
+                    SEGMENT_CENTER_ANGLES[targetSegmentIdx];
+
+                const isSpecial = WHEEL_SPECIAL_INDICES.has(targetSegmentIdx);
+                const seg = WHEEL_SEGMENTS[targetSegmentIdx];
+
+                // ── Rotation math ─────────────────────────────────────────────────
+                // When wheel CSS rotate = θ degrees (CW), a point originally at
+                // angle φ on the wheel appears at screen angle (φ + θ) % 360.
+                // The arrow is fixed at screen angle 0° (top).
+                // To bring segmentCenterAngle to the arrow:
+                //   (segmentCenterAngle + totalRotation) % 360 = 0
+                //   totalRotation = (360 - segmentCenterAngle) % 360  [from 0]
+                //
+                // From current position we find the ADDITIONAL rotation needed.
+
+                const currentNorm = ((currentWheelRotation % 360) + 360) % 360;
+
+                // Desired absolute (normalized) wheel position to land the segment at top
+                const desiredNorm = (360 - (segmentCenterAngle + CONFIG.wheelCalibrationDeg)) % 360;
+
+                // How much MORE do we need to rotate CW from current position?
+                let rotationNeeded = (desiredNorm - currentNorm + 360) % 360;
+
+                // Always spin at least 90° so motion is visible (not just a twitch)
+                if (rotationNeeded < 90) rotationNeeded += 360;
+
+                const totalNewRotation = currentWheelRotation + rotationNeeded + extraRotations * 360;
+
+                // ── Debug output (console) ─────────────────────────────────────────
+                const debugLines = [
+                    `Target: [${targetSegmentIdx}] "${seg.display}" (${seg.type})${isSpecial ? ' ★ SPECIAL 2×' : ''}`,
+                    `Slots before: ${slotsBefore}, width: ${slotWidth}, center: ${segmentCenterAngle.toFixed(1)}°`,
+                    `Wheel at: ${currentWheelRotation.toFixed(1)}° → norm: ${currentNorm.toFixed(1)}°`,
+                    `Desired norm: ${desiredNorm.toFixed(1)}°`,
+                    `Rotation: +${rotationNeeded.toFixed(1)}° + ${extraRotations}×360° = ${totalNewRotation.toFixed(1)}°`,
+                    `Verify: (${segmentCenterAngle.toFixed(1)} + ${totalNewRotation.toFixed(1)}) % 360 = ${((segmentCenterAngle + totalNewRotation) % 360).toFixed(1)}° (want 0°)`
+                ];
+
+                console.group(`🎡 Wheel spin → segment[${targetSegmentIdx}] "${seg.display}"`);
+                debugLines.forEach(l => console.log('  ' + l));
+                console.groupEnd();
+
+                // ── Debug panel (on-screen) ────────────────────────────────────────
+                updateDebugPanel(targetSegmentIdx, seg, segmentCenterAngle, slotsBefore, slotWidth,
+                    currentWheelRotation, currentNorm, desiredNorm, rotationNeeded, totalNewRotation);
+
+                // ── Apply animation ────────────────────────────────────────────────
+                wheelEl.style.transition =
+                    `transform ${durationSec}s cubic-bezier(0.17, 0.67, 0.16, 0.99)`;
+                wheelEl.style.transform = `rotate(${totalNewRotation}deg)`;
+                currentWheelRotation = totalNewRotation;
+
+                setTimeout(resolve, durationSec * 1000);
+            });
+        }
+
+        function updateDebugPanel(segIdx, seg, centerAngle, slotsBefore, slotWidth,
+            currRot, currNorm, desiredNorm, rotNeeded, totalRot) {
+
+            const isSpecial = WHEEL_SPECIAL_INDICES.has(segIdx);
+            const verify = ((centerAngle + totalRot) % 360 + 360) % 360;
+            const verifyOk = verify < 0.5 || verify > 359.5;
+
+            debugContent.innerHTML = `
+            <div class="debug-row"><span class="debug-key">Segment:   </span>
+              <span class="debug-val">[${segIdx}] "${seg.display}" (${seg.type})</span>
+              ${isSpecial ? '<span style="color:#FFD700"> ★ 2× SPECIAL</span>' : ''}
+            </div>
+            <div class="debug-sep">──────────────────────────────</div>
+            <div class="debug-row"><span class="debug-key">Slots before:  </span>
+              <span class="debug-val">${slotsBefore} slots × 10° = ${(slotsBefore * 10).toFixed(0)}°</span>
+            </div>
+            <div class="debug-row"><span class="debug-key">Slot width:    </span>
+              <span class="debug-val">${slotWidth} × 10° = ${slotWidth * 10}°</span>
+            </div>
+            <div class="debug-row"><span class="debug-key">Center angle:  </span>
+              <span class="debug-val">${centerAngle.toFixed(1)}°</span>
+            </div>
+            <div class="debug-sep">──────────────────────────────</div>
+            <div class="debug-row"><span class="debug-key">Current rot:   </span>
+              <span class="debug-val">${currRot.toFixed(1)}° → norm: ${currNorm.toFixed(1)}°</span>
+            </div>
+            <div class="debug-row"><span class="debug-key">Desired norm:  </span>
+              <span class="debug-val">(360 − ${centerAngle.toFixed(1)}) = ${desiredNorm.toFixed(1)}°</span>
+            </div>
+            <div class="debug-row"><span class="debug-key">Rot needed:    </span>
+              <span class="debug-val">${rotNeeded.toFixed(1)}° + ${CONFIG.wheelExtraRotations}×360°</span>
+            </div>
+            <div class="debug-row"><span class="debug-key">Total new rot: </span>
+              <span class="debug-val">${totalRot.toFixed(1)}°</span>
+            </div>
+            <div class="debug-sep">──────────────────────────────</div>
+            <div class="debug-row"><span class="debug-key">Verify (want 0°): </span>
+              <span class="${verifyOk ? 'debug-val' : 'debug-warn'}">${verify.toFixed(2)}° ${verifyOk ? '✅' : '❌ drift!'}</span>
+            </div>
+            <div class="debug-sep">──────────────────────────────</div>
+            <div style="color:#888;font-size:10px;margin-top:4px">
+              Calibration: ${CONFIG.wheelCalibrationDeg}°&nbsp;&nbsp;
+              Special indices: 0,8,16,24&nbsp;&nbsp;
+              10°/slot × 36 slots = 360°
+            </div>
+          `;
+        }
+
+        // ─── COIN SHOWER ────────────────────────────────────────────────────────
+        function coinShower(coinCount) {
+            const shower = document.createElement('div');
+            shower.className = 'coin-shower';
+            document.body.appendChild(shower);
+            for (let i = 0; i < coinCount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin-particle';
+                coin.style.left = (Math.random() * 100) + '%';
+                coin.style.animationDuration = (1.2 + Math.random() * 1.5) + 's';
+                coin.style.animationDelay = (Math.random() * 0.5) + 's';
+                shower.appendChild(coin);
+            }
+            setTimeout(() => shower.remove(), 3500);
+        }
+
+        // ─── UI UPDATES ────────────────────────────────────────────────────────
+        function updateBalanceDisplay() {
+            balanceEl.textContent = '$' + state.balance.toFixed(2);
+            $('spin-count').textContent = state.spinCount;
+            $('total-bet').textContent = '$' + state.totalBet.toFixed(0);
+            $('total-won').textContent = '$' + state.totalWon.toFixed(0);
+            if (state.totalBet > 0) {
+                const rtp = (state.totalWon / state.totalBet * 100).toFixed(1);
+                $('realized-rtp').textContent = rtp + '%';
+            }
+        }
+
+        function updateLastWin(amount, animate) {
+            lastWinEl.textContent = '$' + amount.toFixed(2);
+            if (animate && amount > 0) {
+                lastWinEl.classList.remove('flashing');
+                void lastWinEl.offsetWidth;
+                lastWinEl.classList.add('flashing');
+            }
+        }
+
+        function setStatus(message, flash) {
+            statusBar.textContent = message;
+            if (flash) {
+                statusBar.classList.remove('flashing');
+                void statusBar.offsetWidth;
+                statusBar.classList.add('flashing');
+            }
+        }
+
+        function showMatchIndicator(text, isSpecial) {
+            matchIndicator.textContent = text;
+            matchIndicator.className = 'match-indicator show' + (isSpecial ? ' special' : '');
+            setTimeout(() => matchIndicator.classList.remove('show'), 2500);
+        }
+
+        function showWinPopup(title, amount, detail) {
+            $('popup-title').textContent = title;
+            $('popup-amount').textContent = amount > 0 ? '$' + amount.toFixed(2) : '';
+            $('popup-detail').innerHTML = detail || '';
+            $('win-popup').classList.remove('hidden');
+        }
+        function hideWinPopup() {
+            $('win-popup').classList.add('hidden');
+        }
+
+        // ─── MAIN SPIN FLOW ────────────────────────────────────────────────────
+        async function performSpin(isFreeSpin) {
+            if (state.isSpinning) return;
+            if (!isFreeSpin && state.balance < state.betSize) {
+                setStatus('Not enough balance to spin', true);
+                state.autoSpinsRemaining = 0;
+                autoBtn.classList.remove('auto-active');
+                autoBtn.textContent = 'AUTO 25';
+                return;
+            }
+
+            state.isSpinning = true;
+            spinBtn.disabled = true;
+            paylineEl.classList.remove('win');
+
+            if (!isFreeSpin) {
+                state.balance -= state.betSize;
+                state.totalBet += state.betSize;
+            }
+            updateBalanceDisplay();
+            setStatus(isFreeSpin ? ' FREE SPIN ' : 'Spinning...');
+            // 1. Math first
+            const result = runSpin(state.betSize, isFreeSpin);
+
+            // 2. Animations (reels staggered, wheel in parallel)
+            const reelPromises = [];
+            for (let i = 0; i < 3; i++) {
+                const dur = CONFIG.reelSpinDurationBase + (i * CONFIG.reelStopStaggerSeconds);
+                reelPromises.push(spinReelTo(i, result.stops[i], dur));
+            }
+            const wheelPromise = spinWheelTo(
+                result.wheelIdx,
+                CONFIG.wheelSpinDuration,
+                CONFIG.wheelExtraRotations
+            );
+
+            await Promise.all([...reelPromises, wheelPromise]);
+            await new Promise(r => setTimeout(r, 200));
+            // 3. Apply payouts
+            state.spinCount++;
+            state.balance += result.totalWin;
+            state.totalWon += result.totalWin;
+            if (result.totalWin > 0) state.hitCount++;
+            if (result.matchCount > 0) state.matchCounts[result.matchCount]++;
+            state.lineWinHistory.push(result.totalWin);
+            updateBalanceDisplay();
+
+            // 4. Feedback
+            let statusParts = [];
+            if (result.hasLineWin) {
+                paylineEl.classList.add('win');
+                const sym = SYMBOLS[Object.keys(SYMBOLS).find(k => SYMBOLS[k].id === result.lineWinSymbol)];
+                statusParts.push(`Line: 3× ${sym.name} → $${result.lineWinAmount.toFixed(2)}`);
+            }
+
+            if (result.wheelSegment.type === 'dragon') {
+                showMatchIndicator(`Wheel: DRAGON (${result.matchCount} match${result.matchCount === 1 ? '' : 'es'})`, result.matchCount > 0);
+            } else if (result.wheelSegment.type === 'treasure') {
+                showMatchIndicator(`Wheel: TREASURE (${result.matchCount} match${result.matchCount === 1 ? '' : 'es'})`, result.matchCount > 0);
+            } else {
+                showMatchIndicator(`Wheel: ${result.wheelSegment.display}`, false);
+            }
+
+            if (result.matchCount === 3) {
+                statusParts.push(`★★★ JACKPOT ★★★ Line × ${result.lineMultiplier}!`);
+                showWinPopup('★ JACKPOT ★', result.totalWin,
+                    `THREE matches! Line win × ${result.lineMultiplier}<br>Once-a-year moment.`);
+                coinShower(60);
+            } else if (result.matchCount === 2) {
+                statusParts.push(`✦ TWO MATCHES! +$${result.cashBonus.toFixed(2)} bonus`);
+                if (result.totalWin >= state.betSize * 5) {
+                    showWinPopup('TWO MATCHES!', result.totalWin,
+                        `$${result.cashBonus.toFixed(2)} cash bonus${result.hasLineWin ? '<br>+ line win' : ''}`);
+                    coinShower(20);
+                }
+            } else if (result.isFreeSpin) {
+                statusParts.push(`✦ FREE SPIN AWARDED ✦`);
+            } else if (result.hasLineWin && result.lineWinSymbol === 'dragon') {
+                statusParts.push(`Dragon line — top regular win!`);
+                coinShower(15);
+            } else if (result.hasLineWin && result.lineWinSymbol === 'treasure') {
+                statusParts.push(`Treasure line — premium hit!`);
+                coinShower(25);
+            }
+
+            if (statusParts.length === 0) {
+                setStatus('No win — try again');
+            } else {
+                setStatus(statusParts.join('  •  '), true);
+            }
+
+            updateLastWin(result.totalWin, result.totalWin > 0);
+
+            state.isSpinning = false;
+            spinBtn.disabled = false;
+            betSelect.disabled = false;
+
+            if (result.isFreeSpin) {
+                await new Promise(r => setTimeout(r, CONFIG.freeSpinDelayMs));
+                performSpin(true);
+                return;
+            }
+
+            if (state.autoSpinsRemaining > 0) {
+                state.autoSpinsRemaining--;
+                autoBtn.textContent = `AUTO ${state.autoSpinsRemaining}`;
+                if (state.autoSpinsRemaining === 0) {
+                    autoBtn.classList.remove('auto-active');
+                    autoBtn.textContent = 'AUTO 25';
+                } else {
+                    await new Promise(r => setTimeout(r, CONFIG.autoSpinDelayMs));
+                    performSpin(false);
+                }
+            }
+        }
+
+        // ─── EVENT WIRING ──────────────────────────────────────────────────────
+        spinBtn.addEventListener('click', () => {
+            if (state.autoSpinsRemaining > 0) {
+                state.autoSpinsRemaining = 0;
+                autoBtn.classList.remove('auto-active');
+                autoBtn.textContent = 'AUTO 25';
+            }
+            performSpin(false);
+        });
+
+        autoBtn.addEventListener('click', () => {
+            if (state.autoSpinsRemaining > 0) {
+                state.autoSpinsRemaining = 0;
+                autoBtn.classList.remove('auto-active');
+                autoBtn.textContent = 'AUTO 25';
+            } else {
+                state.autoSpinsRemaining = CONFIG.autoSpinCount;
+                autoBtn.classList.add('auto-active');
+                autoBtn.textContent = `AUTO ${state.autoSpinsRemaining}`;
+                if (!state.isSpinning) performSpin(false);
+            }
+        });
+
+        betSelect.addEventListener('change', e => {
+            state.betSize = parseFloat(e.target.value);
+        });
+
+        $('paytable-btn').addEventListener('click', () => $('paytable-popup').classList.remove('hidden'));
+        $('close-paytable').addEventListener('click', () => $('paytable-popup').classList.add('hidden'));
+        $('close-popup').addEventListener('click', hideWinPopup);
+
+        // Debug toggle
+        $('debug-toggle').addEventListener('click', () => debugPanel.classList.toggle('visible'));
+        document.addEventListener('keydown', e => {
+            if (e.code === 'KeyD' && document.activeElement.tagName !== 'INPUT') {
+                debugPanel.classList.toggle('visible');
+            }
+            if (e.code === 'Space' && !state.isSpinning && document.activeElement.tagName !== 'BUTTON') {
+                e.preventDefault();
+                spinBtn.click();
+            }
+        });
+
+        // ─── INIT ──────────────────────────────────────────────────────────────
+        buildReelStrips();
+        updateBalanceDisplay();
+        updateLastWin(0, false);
+
+        console.log('Imperial Fortune loaded. Press D to toggle debug panel.');
+        console.log('Reel composition:', REEL_STRIP.map(s => s.id).reduce((acc, id) => {
+            acc[id] = (acc[id] || 0) + 1; return acc;
+        }, {}));
+    </script>
+</body>
+</html>
