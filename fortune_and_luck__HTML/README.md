@@ -1,4 +1,4 @@
-# Imperial Fortune — Slot Game Prototype
+# Imperial Fortune - Slot Game Prototype
 
 A playable HTML5 prototype of the Imperial Fortune slot game built for the AGS Game Innovation Fellowship candidate exercise.
 
@@ -69,9 +69,9 @@ Tested and works in Chrome 90+, Firefox 90+, Safari 14+, Edge 90+. Requires:
 
 - No sound effects (the brief explicitly says polish isn't required)
 - No save/load (refresh the page = $100 fresh start, useful for testing)
-- Single bet size lock recommended for math accuracy (other sizes use same RTP, multiplied)
+- Single bet size lock recommended for math accuracy (other sizes use the same RTP, multiplied)
 
 ---
 
-**Built by:** Dhruvi (Starlight) Choksi — May 2026
+**Built by:** Dhruvi (Starlight) Choksi - May 2026
 **For:** AGS Game Innovation Fellowship candidate exercise
