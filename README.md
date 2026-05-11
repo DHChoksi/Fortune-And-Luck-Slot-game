@@ -1,4 +1,4 @@
-# Imperial Fortune — Slot Game Prototype
+# Imperial Fortune - Slot Game Prototype
 
 A playable HTML5 prototype of the Imperial Fortune slot game built for the AGS Game Innovation Fellowship candidate exercise.
 
@@ -14,7 +14,7 @@ A playable HTML5 prototype of the Imperial Fortune slot game built for the AGS G
 
 - **Slot reels (left)**: 3 reels, 22 stops each, displayed as a 3×3 grid with the middle row paying.
 - **Fortune Wheel (right)**: Always-visible roulette-style wheel that spins in parallel with every slot spin.
-- **Stats bar (bottom-right)**: Live tracking of spin count, total bet, total won, and realized RTP. After 100+ spins this should converge near the theoretical 90.24%.
+- **Stats bar (bottom-right)**: Live tracking of spin count, total bet, total won, and realized RTP. After 100+ spins, this should converge near the theoretical 90.24%.
 
 ## What to Watch For
 
@@ -69,9 +69,9 @@ Tested and works in Chrome 90+, Firefox 90+, Safari 14+, Edge 90+. Requires:
 
 - No sound effects (the brief explicitly says polish isn't required)
 - No save/load (refresh the page = $100 fresh start, useful for testing)
-- Single bet size lock recommended for math accuracy (other sizes use same RTP, multiplied)
+- Single bet size lock recommended for math accuracy (other sizes use the same RTP, multiplied)
 
 ---
 
-**Built by:** Dhruvi (Starlight) Choksi — May 2026
+**Built by:** Dhruvi (Starlight) Choksi - May 2026
 **For:** AGS Game Innovation Fellowship candidate exercise
